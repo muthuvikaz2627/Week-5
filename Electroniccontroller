@@ -1,0 +1,87 @@
+package com.prodapt.controller;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistry;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.query.Query;
+
+import com.prodapt.entity.electronic;
+
+public class Electroniccontroller {
+	public static void main(String[] args) {
+        StandardServiceRegistry ssr = new StandardServiceRegistryBuilder().configure("hibernate.cfg.xml").build();
+        Metadata meta = new MetadataSources(ssr).getMetadataBuilder().build();
+
+        SessionFactory factory = meta.getSessionFactoryBuilder().build();
+        Session session = factory.openSession();
+      //  Transaction t = session.beginTransaction();
+        /// till here All Transactions are Done........
+
+        //W ready to Go with Our Main Purpose....//TaSK
+        electronic e1 = new  electronic("AC",7,30000);
+
+        electronic  e2 = new  electronic ("Refrigerator",9,35000);
+
+        electronic  e3 = new  electronic ("TV",8,50000);  //By constructor
+
+        session.save(e1);
+        session.save(e2);
+        session.save(e3);
+        System.out.println("records got completed succesfully");
+
+
+        //Now read operations
+        List< electronic > libs = session.createQuery("from electronic").list();//this represents HQL,similar to select * from Customer in SQL
+        for (Iterator iterator = libs.iterator(); iterator.hasNext();){
+
+
+        	 electronic  lib = ( electronic ) iterator.next();
+
+        System.out.println(lib.getQuantity() + " " + lib.getProduct() );
+        }
+        //easy approach
+        Query query=session.createQuery("from electronic");//here persistent class name is Customer 
+        ArrayList< electronic > list=(ArrayList< electronic >) query.list();
+        for ( electronic  cust : list) {
+            System.out.println(cust);
+        }
+        
+        
+        //update operations
+        Transaction tx=session.beginTransaction();
+        Query q=session.createQuery("update electronic set product=:p1 where quantity=:p2");
+        q.setParameter("p1","Radio");     //record 10
+        q.setParameter("p2",3);
+
+        int status=q.executeUpdate();
+        System.out.println(status);
+        tx.commit();
+
+
+        //delete operations
+        Transaction tx2=session.beginTransaction();
+        Query q1=session.createQuery("delete electronic  where quantity=:p2");
+        //q.setParameter("p1","AC");     //record 10
+        q1.setParameter("p2",5);
+
+        int status1=q1.executeUpdate();
+        System.out.println(status1);
+       tx2.commit();
+
+
+        //t.commit();
+        session.close();
+    }
+}
+
+
+
+
